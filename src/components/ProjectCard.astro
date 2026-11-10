@@ -1,0 +1,24 @@
+---
+import type { Project } from '../data/projects';
+import { platformLabels } from '../data/site';
+interface Props { project: Project; index?: number; }
+const { project, index } = Astro.props;
+const d = project.data;
+const href = d.level === 'case' ? `/projects/${project.id}/` : (d.url || undefined);
+const external = d.level !== 'case' && !!d.url;
+const meta = [d.platform.map((p) => platformLabels[p]).join(' · '), d.period].join(' · ');
+const shot = d.screenshots[0];
+---
+<a href={href} class="card" target={external ? '_blank' : undefined} rel={external ? 'noopener' : undefined}>
+  <div class="caps" style="display:flex;justify-content:space-between;gap:12px">
+    <span>{index !== undefined ? String(index + 1).padStart(2, '0') : d.company}</span><span>{meta}</span>
+  </div>
+  <div class="card__media">
+    {shot
+      ? <img src={shot} alt={`${d.title} storefront`} loading="lazy" />
+      : <div class="ph">[Screenshot: {d.title}]</div>}
+  </div>
+  <div class="display card__title" style="font-size:44px;line-height:.95">{d.nda ? 'Under NDA' : d.title}</div>
+  <div style="font-size:16px">{d.summary}</div>
+  {d.level === 'case' && <span class="caps" style="margin-top:auto">Read the case <span class="arrow" aria-hidden="true">↗</span></span>}
+</a>

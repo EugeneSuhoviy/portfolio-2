@@ -1,0 +1,99 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { getProjects } from '../../data/projects';
+import { platformLabels, problemLabels } from '../../data/site';
+
+const projects = await getProjects();
+const visual = projects.filter((p) => p.data.level !== 'archive');
+const archive = projects.filter((p) => p.data.level === 'archive');
+const platforms = Object.keys(platformLabels).map((k) => ({ k, n: projects.filter((p) => p.data.platform.includes(k as any)).length }));
+const attrs = (p: (typeof projects)[number]) => ({ 'data-platform': p.data.platform.join(' '), 'data-problems': p.data.problems.join(' ') });
+---
+<Base title="Projects · Eugene Sukhovii">
+  <section class="bb pad">
+    <h1 class="display" style="font-size:clamp(64px,10vw,128px);line-height:.86">Projects</h1>
+    <p style="margin:24px 0 0;font-size:19px;max-width:620px">{projects.length} stores since 2014. Shopify first, then headless frontends and a decade of Magento.</p>
+  </section>
+
+  <div class="bb caps filters" style="display:flex;flex-wrap:wrap;align-items:stretch" role="group" aria-label="Filter by platform">
+    <button type="button" class="filter nav-link" data-filter="all" aria-pressed="true" style="padding:18px 24px;border:0;border-right:var(--line);background:none;font:inherit;cursor:pointer">All {projects.length}</button>
+    {platforms.map((p) => (
+      <button type="button" class="filter nav-link" data-filter={p.k} aria-pressed="false" style="padding:18px 24px;border:0;border-right:var(--line);background:none;font:inherit;cursor:pointer">{platformLabels[p.k]} {p.n}</button>
+    ))}
+  </div>
+
+  <div id="problem-bar" class="caps bb problem-bar on-green" hidden data-labels={JSON.stringify(problemLabels)}>
+    <span>Showing: <span id="problem-label"></span></span>
+    <button type="button" id="problem-clear"><span aria-hidden="true">✕</span> Show all</button>
+  </div>
+
+  <section class="grid bb" style="--min:320px" id="cards">
+    {visual.map((p) => <div class="br bb item" {...attrs(p)}><ProjectCard project={p} /></div>)}
+  </section>
+  <p id="empty" hidden style="padding:40px 24px;margin:0" class="bb">No projects match this filter yet.</p>
+
+  <section class="bb">
+    <details id="archive" class="archive-details">
+      <summary class="pad display h2 row-link archive__summary"><span class="archive__label">Archive</span> <span style="color:var(--green-ink)">{archive.length}</span> <span class="archive__arrow" aria-hidden="true">↓</span></summary>
+      <table class="archive" style="width:100%;border-collapse:collapse;font-size:16px">
+        <thead class="caps"><tr class="bt"><th scope="col" style="text-align:left;padding:14px 24px">Store</th><th scope="col" style="text-align:left;padding:14px 24px">Platform</th><th scope="col" style="text-align:left;padding:14px 24px">Team</th><th scope="col" style="text-align:right;padding:14px 24px">Years</th></tr></thead>
+        <tbody>
+          {archive.map((p, i) => (
+            <tr class="bt item row-link" style={`--i:${i}`} {...attrs(p)}>
+              <td style="padding:14px 24px;font-weight:500">{p.data.url ? <a href={p.data.url} target="_blank" rel="noopener" class="row-link__text">{p.data.title}</a> : <span class="row-link__text">{p.data.title}</span>}</td>
+              <td style="padding:14px 24px">{p.data.stack.join(', ')}</td>
+              <td style="padding:14px 24px">{p.data.company}</td>
+              <td style="padding:14px 24px;text-align:right">{p.data.period}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </details>
+  </section>
+
+  <script>
+    const items = [...document.querySelectorAll<HTMLElement>('.item')];
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>('.filter')];
+    const bar = document.getElementById('problem-bar')!;
+    const barLabel = document.getElementById('problem-label')!;
+    const clear = document.getElementById('problem-clear')!;
+    const empty = document.getElementById('empty')!;
+    const labels: Record<string, string> = JSON.parse(bar.dataset.labels || '{}');
+    const params = new URLSearchParams(location.search);
+    let platform = params.get('platform') || 'all';
+    // Problem comes only from the URL (home page links); unknown tags are ignored.
+    const fromUrl = params.get('problem') || '';
+    let problem = Object.prototype.hasOwnProperty.call(labels, fromUrl) ? fromUrl : '';
+    function apply() {
+      let shown = 0;
+      for (const el of items) {
+        const ok = (platform === 'all' || el.dataset.platform!.split(' ').includes(platform)) &&
+                   (!problem || el.dataset.problems!.split(' ').includes(problem));
+        el.hidden = !ok;
+        if (ok && !el.matches('tr')) shown++;
+      }
+      empty.hidden = shown > 0;
+      bar.hidden = !problem;
+      barLabel.textContent = problem ? labels[problem] : '';
+      buttons.forEach((b) => {
+        const on = b.dataset.filter === platform;
+        b.setAttribute('aria-pressed', String(on));
+        b.style.background = on ? 'var(--ink)' : '';
+        b.style.color = on ? 'var(--bg)' : '';
+      });
+      const q = new URLSearchParams();
+      if (platform !== 'all') q.set('platform', platform);
+      if (problem) q.set('problem', problem);
+      try { history.replaceState(null, '', q.size ? `?${q}` : location.pathname); } catch {}
+    }
+    buttons.forEach((b) => b.addEventListener('click', () => { platform = b.dataset.filter!; apply(); }));
+    clear.addEventListener('click', () => {
+      problem = '';
+      apply();
+      // The bar (and this button) is now hidden, so keep focus in the filter bar.
+      buttons.find((b) => b.getAttribute('aria-pressed') === 'true')?.focus();
+    });
+    apply();
+  </script>
+</Base>

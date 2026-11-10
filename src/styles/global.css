@@ -1,0 +1,193 @@
+:root {
+  --bg: #EFEEE9;
+  --ink: #111111;
+  --ink-2: #2E2E2B;
+  --muted: #4A4A45;
+  --ph: #DCDBD4;
+  --green: #008060;       /* fills: header CTA, logo, contact and next-case blocks; text on top is --on-green */
+  --on-green: #F7F7F3;    /* text on --green: 4.59:1 (#F4F3EE would be 4.44, below AA) */
+  --green-soft: #D6E9E1;  /* light green on black: the logo's hover letters (14.9:1) */
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --green-ink: #008060;   /* green text on the light background (large text only: 4.25:1) */
+  --green-on-dark: #6FB89A; /* green accents on black, e.g. ticker dots (8.1:1) */
+  --line: 1px solid var(--ink);
+  --display: 'Archivo Variable', 'Arial Narrow', sans-serif;
+  --body: 'Inter Variable', system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.55 var(--body); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+:focus-visible { outline: 3px solid var(--green-ink); outline-offset: 2px; }
+
+.frame { max-width: 1280px; margin: 0 auto; border-inline: var(--line); }
+.display { font-family: var(--display); font-stretch: 75%; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; line-height: 0.9; margin: 0; }
+.h2 { font-size: clamp(48px, 7vw, 80px); }
+.caps { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.bt { border-top: var(--line); } .bb { border-bottom: var(--line); } .br { border-right: var(--line); }
+.pad { padding: 56px 24px 32px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--min, 300px)), 1fr)); }
+.span2 { grid-column: span 2; min-width: 0; }
+@media (max-width: 700px) { .span2 { grid-column: auto; } .br { border-right: 0; border-bottom: var(--line); } }
+
+.filter { background: transparent; } /* the filter script clears inline backgrounds; avoid the UA button grey */
+
+/* Hover language (also on :focus-visible): a green-ink bar grows along one edge, the text turns
+   green-ink, the arrow moves. Only <a>, <button> and <summary> get it. Movement and transitions
+   live in the no-preference block below, so reduced motion keeps only the colour change. */
+.arrow { display: inline-block; }
+/* rows: situations, FAQ questions, archive rows (bar on the first cell, not the <tr>; in a row the link stays the only clickable part) */
+.row-link { position: relative; text-decoration: none; }
+:is(a, summary).row-link { cursor: pointer; }
+.row-link__text { display: inline-block; }
+:is(a, summary).row-link::before, tr.row-link > td:first-child::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 4px; background: var(--green-ink); transform: scaleY(0); transform-origin: top; }
+tr.row-link > td:first-child { position: relative; }
+:is(a, summary).row-link:is(:hover, :focus-visible) .row-link__text,
+tr.row-link:is(:hover, :focus-within) .row-link__text { color: var(--green-ink); }
+/* project cards: bar along the top, image zooms, title turns green */
+.card { position: relative; display: flex; flex-direction: column; gap: 16px; padding: 24px; height: 100%; text-decoration: none; }
+.card::before { content: ""; position: absolute; top: -1px; left: 0; right: 0; height: 4px; background: var(--green-ink); transform: scaleX(0); transform-origin: left; }
+.card__media { aspect-ratio: 4 / 3; overflow: hidden; border: var(--line); }
+.card__media > * { width: 100%; height: 100%; object-fit: cover; }
+.card__media > .ph { border: 0; }
+a.card[href]:is(:hover, :focus-visible) .card__title { color: var(--green-ink); }
+/* archive toggle on /projects/: reuses the row bar (.row-link); "Archive" turns green, the arrow turns when open */
+.archive__summary { list-style: none; }
+.archive__summary::-webkit-details-marker { display: none; }
+.archive__arrow { display: inline-block; }
+.archive-details[open] > .archive__summary .archive__arrow { transform: rotate(180deg); }
+.archive__summary:is(:hover, :focus-visible) .archive__label { color: var(--green-ink); }
+@keyframes archive-row-in { from { opacity: 0; transform: translateY(8px); } }
+/* header nav links and the platform filters: bar along the bottom */
+.nav-link { position: relative; text-decoration: none; }
+.nav-link::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--green-ink); transform: scaleX(0); transform-origin: left; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .arrow, :is(a, summary).row-link::before, tr.row-link > td:first-child::before, .card::before, .nav-link::after { transition: transform .3s var(--ease); }
+  .row-link__text { transition: transform .3s var(--ease), color .3s var(--ease); }
+  .card__title { transition: color .3s var(--ease); }
+  .card__media > * { transition: transform .6s var(--ease); }
+  a:not(.btn):is(:hover, :focus-visible) .arrow { transform: translateX(6px); }
+  :is(a, summary).row-link:is(:hover, :focus-visible)::before,
+  tr.row-link:is(:hover, :focus-within) > td:first-child::before { transform: scaleY(1); }
+  :is(a, summary).row-link:is(:hover, :focus-visible) .row-link__text,
+  tr.row-link:is(:hover, :focus-within) .row-link__text { transform: translateX(8px); }
+  /* archive: the arrow nudges toward where it points; open = rotated, nudge combined with the rotation */
+  .archive__label { transition: color .3s var(--ease); }
+  .archive__arrow { transition: transform .3s var(--ease); }
+  .archive__summary:is(:hover, :focus-visible) .archive__arrow { transform: translateY(4px); }
+  .archive-details[open] > .archive__summary:is(:hover, :focus-visible) .archive__arrow { transform: translateY(-4px) rotate(180deg); }
+  /* rows cascade in each time the archive opens (closing is instant); hidden rows stay display:none */
+  .archive-details[open] tbody tr { animation: archive-row-in .4s var(--ease) both; animation-delay: calc(min(var(--i), 20) * 25ms); }
+  /* smooth height where the browser can animate to auto; elsewhere it just opens */
+  @supports (interpolate-size: allow-keywords) {
+    :root { interpolate-size: allow-keywords; }
+    .archive-details::details-content { block-size: 0; overflow: hidden; transition: block-size .4s var(--ease), content-visibility .4s var(--ease) allow-discrete; }
+    .archive-details[open]::details-content { block-size: auto; }
+  }
+  a.card[href]:is(:hover, :focus-visible)::before { transform: scaleX(1); }
+  a.card[href]:is(:hover, :focus-visible) .card__media > * { transform: scale(1.03); }
+  .nav-link:is(:hover, :focus-visible)::after { transform: scaleX(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* the bottom bar is motion-only, so nav links and filters show the hover as a colour change */
+  .nav-link:is(:hover, :focus-visible):not([aria-pressed="true"]) { color: var(--green-ink); }
+}
+
+/* solid green blocks: light text, light focus ring, light inputs, light shadow under dark buttons */
+.on-green { background: var(--green); color: var(--on-green); }
+.on-green :focus-visible { outline-color: var(--on-green); }
+.on-green input, .on-green textarea { background: #F4F3EE; color: var(--ink); }
+.on-green input:focus-visible, .on-green textarea:focus-visible { outline-color: var(--ink); }
+.situation { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 22px 24px; }
+.situation__q { font-size: 21px; font-weight: 500; line-height: 1.3; }
+.situation__proof { text-align: right; }
+
+/* projects: active ?problem= filter */
+.problem-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding: 14px 24px; }
+.problem-bar[hidden] { display: none; }
+.problem-bar button { font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.problem-bar button:hover { text-decoration: none; }
+.btn { display: inline-flex; align-items: center; min-height: 56px; padding: 0 28px; border: var(--line); font: 600 16px var(--body); text-decoration: none; cursor: pointer; transition: transform .2s, box-shadow .2s; background: var(--bg); color: var(--ink); }
+.btn--dark { background: var(--ink); color: var(--bg); }
+.btn:hover { transform: translate(-3px, -3px); box-shadow: 6px 6px 0 var(--ink); }
+.btn--dark:hover { box-shadow: 6px 6px 0 var(--green); }
+.on-green .btn--dark:hover { box-shadow: 6px 6px 0 var(--on-green); } /* a green shadow would vanish on a green block */
+
+.ph { background: var(--ph); border: var(--line); display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center; color: var(--muted); font-size: 14px; }
+
+/* header logo: the mark lifts, its "ES" swaps to light-green-on-black, the name gets an underline */
+.logo { display: flex; align-items: center; gap: 14px; padding: 12px 20px; text-decoration: none; }
+.logo__mark { position: relative; flex: none; width: 44px; height: 44px; overflow: hidden; border: var(--line); background: var(--green); color: var(--on-green); font: 800 24px/1 var(--display); font-stretch: 75%; letter-spacing: -0.02em; transition: transform .2s ease, box-shadow .2s ease; }
+.logo__mark > span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+.logo__mark > span + span { background: var(--ink); color: var(--green-soft); transform: translateY(100%); }
+.logo__name { position: relative; }
+.logo__name::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 2px; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .3s ease; }
+.logo:hover .logo__mark, .logo:focus-visible .logo__mark { transform: translate(-3px, -3px); box-shadow: 4px 4px 0 var(--ink); }
+.logo:hover .logo__mark > span:first-child, .logo:focus-visible .logo__mark > span:first-child { transform: translateY(-100%); }
+.logo:hover .logo__mark > span + span, .logo:focus-visible .logo__mark > span + span { transform: none; }
+.logo:hover .logo__name::after, .logo:focus-visible .logo__name::after { transform: scaleX(1); }
+/* Ukrainian flag before the location in the header (decorative; the text says Kyiv) */
+.flag { display: inline-block; vertical-align: middle; width: 18px; height: 12px; margin: -2px 6px 0 0; border: 1px solid var(--ink); }
+/* the logo row is taller than the 18px-padded nav cells, so centre their text */
+.site-header nav a, .site-header__role { display: flex; align-items: center; }
+
+/* hero lines slide up */
+.line { display: block; overflow: hidden; }
+.line > span { display: block; animation: up .9s cubic-bezier(.2,.8,.2,1) both; }
+.line:nth-child(2) > span { animation-delay: .1s; } .line:nth-child(3) > span { animation-delay: .2s; }
+@keyframes up { from { transform: translateY(105%); } to { transform: none; } }
+
+/* ticker */
+.ticker { overflow: hidden; background: var(--ink); color: var(--bg); padding: 18px 0; }
+.ticker__track { display: flex; width: max-content; animation: slide 32s linear infinite; }
+.ticker:hover .ticker__track { animation-play-state: paused; }
+@keyframes slide { to { transform: translateX(-50%); } }
+
+/* reveal on scroll (added by script) */
+.js .reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1); }
+.js .reveal.is-in { opacity: 1; transform: none; }
+
+/* "How I work": a bar fills along each step in order, then its number turns green.
+   Triggered by .is-in from the .reveal observer; the no-JS default is the finished state. */
+.steps > li { position: relative; }
+.steps > li::before { content: ""; position: absolute; top: -1px; left: 0; right: 0; height: 4px; background: var(--green-ink); transform-origin: left; }
+.steps > li .step__num { color: var(--green-ink); }
+.js .steps > li::before { transform: scaleX(0); transition: transform .55s linear calc(var(--i) * .55s + .3s); }
+.js .steps > li .step__num { color: #B5B4AC; transition: color .3s ease calc(var(--i) * .55s + .75s); }
+.js .steps.is-in > li::before { transform: scaleX(1); }
+.js .steps.is-in > li .step__num { color: var(--green-ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .line > span, .ticker__track { animation: none; }
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+  .js .steps > li::before { transform: none; transition: none; }
+  .js .steps > li .step__num { color: var(--green-ink); transition: none; }
+  .btn { transition: none; }
+  .logo__mark, .logo__mark > span, .logo__name::after { transition: none; }
+}
+
+input, textarea { font: 400 17px var(--body); padding: 14px 16px; border: var(--line); border-radius: 0; background: var(--bg); color: var(--ink); width: 100%; }
+label { display: flex; flex-direction: column; gap: 8px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 700px) {
+  .site-header__role { display: none; }
+  .site-header > a:first-child { flex: 1 0 100%; border-right: 0; border-bottom: var(--line); }
+  .site-header nav { flex: 1; } .site-header nav a { flex: 1; justify-content: center; text-align: center; padding: 16px 10px !important; font-size: 12px; }
+  .site-header nav a:first-child { border-left: 0 !important; }
+  .hero-actions { justify-content: flex-start !important; }
+  .situation { grid-template-columns: 32px minmax(0, 1fr); gap: 8px 12px; align-items: baseline; padding: 20px 24px; }
+  .situation__q { font-size: 18px; }
+  .situation__proof { grid-column: 2; text-align: left; color: var(--muted); }
+  .filters { display: grid !important; grid-template-columns: 1fr 1fr; }
+  .filters .filter { border-bottom: var(--line) !important; text-align: left; }
+  .filters .filter:nth-of-type(2n) { border-right: 0 !important; }
+  .filters .filter:nth-last-of-type(-n+2) { border-bottom: 0 !important; }
+  .archive th:nth-child(3), .archive td:nth-child(3) { display: none; }
+  .archive th, .archive td { padding: 12px 10px !important; font-size: 15px; }
+  .archive th:first-child, .archive td:first-child { padding-left: 24px !important; overflow-wrap: anywhere; }
+  .archive th:last-child, .archive td:last-child { padding-right: 24px !important; white-space: nowrap; }
+}

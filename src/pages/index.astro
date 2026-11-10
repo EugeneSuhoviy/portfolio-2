@@ -1,0 +1,130 @@
+---
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { getProjects, getStats } from '../data/projects';
+import { site, situations, steps, faq } from '../data/site';
+
+const projects = await getProjects();
+const stats = await getStats();
+const featured = projects.filter((p) => p.data.featured).sort((a, b) => a.data.order - b.data.order).slice(0, 3);
+const proofFor = (problem: string) =>
+  projects.filter((p) => p.data.problems.includes(problem as any) && p.data.level !== 'archive' && !p.data.nda)
+    .slice(0, 2).map((p) => p.data.title).join(', ');
+const brands = ['Forever 21', 'ASICS', 'Petbarn', 'Blundstone', 'STIHL', 'Goodyear', 'Nine West', 'Scotch & Soda', 'Miele', 'Vespa'];
+const ticker = situations.map((s) => s.q);
+---
+<Base>
+  <section class="bb" style="padding:56px 24px 40px">
+    <h1 class="display" style="font-size:clamp(56px,11.5vw,148px);line-height:.86;letter-spacing:-.035em">
+      <span class="line"><span>Shopify stores</span></span>
+      <span class="line"><span>your team <span style="color:var(--green-ink)">can edit</span></span></span>
+      <span class="line"><span>without me.</span></span>
+    </h1>
+    <div class="grid" style="--min:280px;gap:24px;margin-top:48px;align-items:end">
+      <p style="margin:0;font-size:19px;max-width:460px">{stats.years} years in eCommerce frontend. {stats.stores}+ stores for Forever 21, ASICS, Petbarn and others.</p>
+      <div class="hero-actions" style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end">
+        <a href="#start" class="btn btn--dark">Start a project <span class="arrow" aria-hidden="true">↗</span></a>
+        <a href="/projects/" class="btn">See the work</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="ticker bb" aria-label="What clients come to me with">
+    <div class="ticker__track" aria-hidden="true">
+      {[...ticker, ...ticker].map((t) => (
+        <span class="display" style="font-size:30px;font-weight:700;padding:0 24px;white-space:nowrap;letter-spacing:0">{t} <span style="color:var(--green-on-dark);padding-left:24px">●</span></span>
+      ))}
+    </div>
+  </section>
+
+  <section class="grid bb reveal" style="--min:240px" aria-label="Experience in numbers">
+    {[
+      { to: stats.years, suffix: '', label: 'Years in eCommerce frontend' },
+      { to: stats.stores, suffix: '+', label: 'Stores delivered' },
+      { to: stats.companies, suffix: '', label: 'Agencies and teams' },
+    ].map((s) => (
+      <div class="br" style="padding:32px 24px">
+        <div class="display" style="font-size:120px;line-height:.85" data-to={s.to} data-suffix={s.suffix}>{s.to}{s.suffix}</div>
+        <div class="caps" style="margin-top:16px;font-size:14px">{s.label}</div>
+      </div>
+    ))}
+  </section>
+
+  <section class="bb">
+    <div class="pad" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:16px">
+      <h2 class="display h2">Selected work</h2>
+      <a href="/projects/" class="caps">All {projects.length} projects <span class="arrow" aria-hidden="true">↗</span></a>
+    </div>
+    <div class="grid bt reveal" style="--min:320px">
+      {featured.map((p, i) => <div class="br"><ProjectCard project={p} index={i} /></div>)}
+    </div>
+    <p class="bt caps" style="margin:0;padding:20px 24px;color:var(--muted)">Also worked on: <span style="color:var(--ink)">{brands.join(' · ')}</span></p>
+  </section>
+
+  <section class="grid bb" style="--min:300px">
+    <div class="br" style="padding:56px 24px">
+      <h2 class="display h2">What clients come to me with</h2>
+    </div>
+    <div class="span2 reveal">
+      {situations.map((s, i) => (
+        <a href={`/projects/?problem=${s.problem}`} class="row-link bb situation">
+          <span class="caps">{String(i + 1).padStart(2, '0')}</span>
+          <span class="situation__q row-link__text">{s.q}</span>
+          <span class="caps situation__proof">{proofFor(s.problem)} <span class="arrow" aria-hidden="true">↗</span></span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="bb">
+    <h2 class="display h2 pad">How I work</h2>
+    <ol class="grid bt reveal steps" style="--min:240px;list-style:none;margin:0;padding:0">
+      {steps.map((st, i) => (
+        <li class="br" style={`padding:28px 24px;--i:${i}`}>
+          <div class="display step__num" aria-hidden="true" style="font-size:64px;line-height:1">{String(i + 1).padStart(2, '0')}</div>
+          <div style="font-weight:600;margin:16px 0 6px;font-size:18px">{st.t}</div>
+          <div style="font-size:16px;color:var(--ink-2)">{st.d}</div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section id="about" class="grid bb" style="--min:300px">
+    <img src="/about/photo.jpg" alt="Eugene Sukhovii" width="1000" height="1000" loading="lazy" class="br" style="width:100%;height:100%;aspect-ratio:1;object-fit:cover;object-position:center 30%" />
+    <div class="span2 reveal" style="padding:48px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:32px">
+      <div>
+        <h2 class="display h2" style="margin-bottom:24px">About</h2>
+        <p style="margin:0 0 16px;font-size:21px;line-height:1.45;max-width:640px">Magento since {site.startYear}, frontend tech lead at Overdose, Shopify today. Stores for brands across Australia, New Zealand, the US and Europe.</p>
+        <p style="margin:0;color:var(--ink-2);max-width:640px">Dawn, Horizon and premium themes, custom sections and blocks, metaobjects, Shopify Markets. [A line about you outside work.]</p>
+      </div>
+      <div class="caps" style="display:flex;flex-wrap:wrap;gap:8px">
+        <span style="border:var(--line);padding:8px 12px">Adobe Certified Expert</span>
+        <span style="border:var(--line);padding:8px 12px">Contentful Certified</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="bb">
+    <h2 class="display h2 pad">Questions</h2>
+    {faq.map((f) => (
+      <details class="bt">
+        <summary class="row-link" style="padding:22px 24px;font-weight:600;font-size:18px"><span class="row-link__text">{f.q}</span></summary>
+        <p style="margin:-10px 0 0;padding:0 24px 22px;color:var(--ink-2);max-width:768px">{f.a}</p>
+      </details>
+    ))}
+  </section>
+
+  <section id="start" class="grid bb on-green" style="--min:320px">
+    <div class="br" style="padding:56px 24px">
+      <h2 class="display" style="font-size:clamp(64px,9vw,112px);line-height:.86;margin-bottom:24px">Have a Shopify task?</h2>
+      <p style="margin:0 0 20px;font-size:18px">I reply within one working day.</p>
+      <a href={`mailto:${site.email}`} style="font-weight:600">{site.email}</a>
+    </div>
+    <form style="padding:56px 24px;display:flex;flex-direction:column;gap:16px" action={`mailto:${site.email}`} method="post" enctype="text/plain">
+      <label class="caps">Store URL<input name="store" type="url" placeholder="https://yourstore.com" /></label>
+      <label class="caps">What do you need?<textarea name="task" rows="3" placeholder="A new product page section from our Figma design"></textarea></label>
+      <label class="caps">Email<input name="email" type="email" required placeholder="you@yourstore.com" /></label>
+      <button type="submit" class="btn btn--dark" style="align-self:start">Send <span class="arrow" aria-hidden="true">↗</span></button>
+    </form>
+  </section>
+</Base>

@@ -1,0 +1,76 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { getProjects } from '../../data/projects';
+import { platformLabels, problemLabels } from '../../data/site';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  const cases = projects.filter((p) => p.data.level === 'case' && !p.data.nda);
+  return cases.map((p, i) => ({ params: { id: p.id }, props: { project: p, next: cases[(i + 1) % cases.length] } }));
+}
+const { project, next } = Astro.props;
+const d = project.data;
+const { Content } = await render(project);
+const facts = [
+  ['Role', d.role],
+  ['Platform', d.platform.map((p) => platformLabels[p]).join(', ')],
+  ['Stack', d.stack.join(', ')],
+  ['Team', d.company],
+  ['Year', d.period],
+  ['Markets', d.markets.join(', ')],
+].filter(([, v]) => v);
+---
+<Base title={`${d.title} · Eugene Sukhovii`} description={d.summary}>
+  <nav class="bb caps" aria-label="Breadcrumb" style="padding:16px 24px"><a href="/projects/">Projects</a> / {d.title}</nav>
+  <section class="bb pad">
+    <h1 class="display" style="font-size:clamp(64px,10vw,128px);line-height:.86">{d.title}</h1>
+    <p style="margin:24px 0 0;font-size:21px;line-height:1.45;max-width:720px">{d.summary}</p>
+    <div class="caps" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:24px">
+      {d.problems.map((k) => <span style="border:var(--line);padding:8px 12px">{problemLabels[k]}</span>)}
+    </div>
+  </section>
+
+  <section class="grid bb" style="--min:300px">
+    {(d.screenshots.length ? d.screenshots : ['', '', '']).map((s, i) => (
+      <div class="br" style="padding:24px">
+        {s ? <img src={s} alt={`${d.title}, screenshot ${i + 1}`} loading="lazy" style="border:var(--line)" />
+           : <div class="ph" style="aspect-ratio:4/3">[Screenshot {i + 1}]</div>}
+      </div>
+    ))}
+  </section>
+
+  {d.metrics.length > 0 && (
+    <section class="grid bb" style="--min:240px">
+      {d.metrics.map((m) => <div class="br display" style="padding:32px 24px;font-size:56px">{m}</div>)}
+    </section>
+  )}
+
+  <section class="grid bb" style="--min:300px">
+    <article class="span2 br case-body" style="padding:48px 24px"><Content /></article>
+    <aside style="padding:48px 24px">
+      <dl style="margin:0;display:flex;flex-direction:column;gap:20px">
+        {facts.map(([k, v]) => <div><dt class="caps" style="color:var(--muted)">{k}</dt><dd style="margin:4px 0 0">{v}</dd></div>)}
+      </dl>
+      {d.url && <a href={d.url} class="btn" target="_blank" rel="noopener" style="margin-top:32px">Live store <span class="arrow" aria-hidden="true">↗</span></a>}
+    </aside>
+  </section>
+
+  <section class="grid bb on-green" style="--min:300px">
+    <a href={`/projects/${next.id}/`} class="br" style="padding:40px 24px;text-decoration:none">
+      <span class="caps">Next case</span>
+      <div class="display" style="font-size:64px;margin-top:12px">{next.data.title} <span class="arrow" aria-hidden="true">↗</span></div>
+    </a>
+    <div style="padding:40px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:24px">
+      <span style="font-size:21px;font-weight:500">Have a similar task?</span>
+      <a href="/#start" class="btn btn--dark" style="align-self:start">Start a project <span class="arrow" aria-hidden="true">↗</span></a>
+    </div>
+  </section>
+</Base>
+
+<style is:global>
+  .case-body h2 { font: 800 32px/1 var(--display); font-stretch: 75%; text-transform: uppercase; margin: 40px 0 12px; }
+  .case-body h2:first-child { margin-top: 0; }
+  .case-body p, .case-body li { max-width: 680px; }
+  .case-body ol, .case-body ul { padding-left: 20px; }
+</style>
