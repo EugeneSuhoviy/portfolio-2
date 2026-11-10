@@ -1,10 +1,11 @@
 ---
 import type { Project } from '../data/projects';
 import { platformLabels } from '../data/site';
+import { url } from '../data/url';
 interface Props { project: Project; index?: number; }
 const { project, index } = Astro.props;
 const d = project.data;
-const href = d.level === 'case' ? `/projects/${project.id}/` : (d.url || undefined);
+const href = d.level === 'case' ? url(`/projects/${project.id}/`) : (d.url || undefined);
 const external = d.level !== 'case' && !!d.url;
 const meta = [d.platform.map((p) => platformLabels[p]).join(' · '), d.period].join(' · ');
 const shot = d.screenshots[0];
@@ -15,7 +16,7 @@ const shot = d.screenshots[0];
   </div>
   <div class="card__media">
     {shot
-      ? <img src={shot} alt={`${d.title} storefront`} loading="lazy" />
+      ? <img src={url(shot)} alt={`${d.title} storefront`} loading="lazy" />
       : <div class="ph">[Screenshot: {d.title}]</div>}
   </div>
   <div class="display card__title" style="font-size:44px;line-height:.95">{d.nda ? 'Under NDA' : d.title}</div>

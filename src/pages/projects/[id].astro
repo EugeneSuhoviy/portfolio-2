@@ -3,6 +3,7 @@ import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { getProjects } from '../../data/projects';
 import { platformLabels, problemLabels } from '../../data/site';
+import { url } from '../../data/url';
 
 export async function getStaticPaths() {
   const projects = await getProjects();
@@ -22,7 +23,7 @@ const facts = [
 ].filter(([, v]) => v);
 ---
 <Base title={`${d.title} · Eugene Sukhovii`} description={d.summary}>
-  <nav class="bb caps" aria-label="Breadcrumb" style="padding:16px 24px"><a href="/projects/">Projects</a> / {d.title}</nav>
+  <nav class="bb caps" aria-label="Breadcrumb" style="padding:16px 24px"><a href={url('/projects/')}>Projects</a> / {d.title}</nav>
   <section class="bb pad">
     <h1 class="display" style="font-size:clamp(64px,10vw,128px);line-height:.86">{d.title}</h1>
     <p style="margin:24px 0 0;font-size:21px;line-height:1.45;max-width:720px">{d.summary}</p>
@@ -34,7 +35,7 @@ const facts = [
   <section class="grid bb" style="--min:300px">
     {(d.screenshots.length ? d.screenshots : ['', '', '']).map((s, i) => (
       <div class="br" style="padding:24px">
-        {s ? <img src={s} alt={`${d.title}, screenshot ${i + 1}`} loading="lazy" style="border:var(--line)" />
+        {s ? <img src={url(s)} alt={`${d.title}, screenshot ${i + 1}`} loading="lazy" style="border:var(--line)" />
            : <div class="ph" style="aspect-ratio:4/3">[Screenshot {i + 1}]</div>}
       </div>
     ))}
@@ -57,13 +58,13 @@ const facts = [
   </section>
 
   <section class="grid bb on-green" style="--min:300px">
-    <a href={`/projects/${next.id}/`} class="br" style="padding:40px 24px;text-decoration:none">
+    <a href={url(`/projects/${next.id}/`)} class="br" style="padding:40px 24px;text-decoration:none">
       <span class="caps">Next case</span>
       <div class="display" style="font-size:64px;margin-top:12px">{next.data.title} <span class="arrow" aria-hidden="true">↗</span></div>
     </a>
     <div style="padding:40px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:24px">
       <span style="font-size:21px;font-weight:500">Have a similar task?</span>
-      <a href="/#start" class="btn btn--dark" style="align-self:start">Start a project <span class="arrow" aria-hidden="true">↗</span></a>
+      <a href={url('/#start')} class="btn btn--dark" style="align-self:start">Start a project <span class="arrow" aria-hidden="true">↗</span></a>
     </div>
   </section>
 </Base>
